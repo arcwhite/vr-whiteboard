@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VR Viewer Example</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui" name="viewport" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="js/three.js"></script>
+    <script type="text/javascript" src="js/FirstPersonControls.js"></script>
+    <script type="text/javascript" src="js/threex.dynamictexture.js"></script>
+    <script type="text/javascript" src="js/TGALoader.js"></script>
+    <script type="text/javascript" src="js/whiteboard.js"></script>
+    <script type="text/javascript" src="js/room.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      var updateLoop = [];
+      var scene = new THREE.Scene();
+
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      document.body.appendChild( renderer.domElement );
+
+      var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+      var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+      var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+
+      var textureLoader = new THREE.TGALoader();
+
+      var room = new Room(textureLoader, scene);
+
+      camera.position.x = 0.00;
+      camera.position.z = 0.00;
+      camera.position.y = 2.0;
+
+      whiteBoard = new WhiteBoard();
+      whiteBoard.position.x = 0.0;
+      whiteBoard.position.y = 2.0;
+      whiteBoard.position.z = -2.99;
+      scene.add( whiteBoard );
+
+      whiteBoard2 = new WhiteBoard();
+      whiteBoard2.position.x = 0.0;
+      whiteBoard2.position.z = 2.99;
+      whiteBoard2.lookAt(new THREE.Vector3(0,0,0));
+      whiteBoard2.position.y = 2.0;
+      scene.add( whiteBoard2 );
+
+      whiteBoard3 = new WhiteBoard();
+      whiteBoard3.position.x = 2.99;
+      whiteBoard3.lookAt(new THREE.Vector3(0,0,0));
+      whiteBoard3.position.z = 0.0;
+      whiteBoard3.position.y = 2.0;
+      scene.add( whiteBoard3 );
+
+      whiteBoard4 = new WhiteBoard();
+      whiteBoard4.position.x = -2.99;
+      whiteBoard4.lookAt(new THREE.Vector3(0,0,0));
+      whiteBoard4.position.z = 0.0;
+      whiteBoard4.position.y = 2.0;
+      scene.add( whiteBoard4 );
+
+      var controls = new THREE.FirstPersonControls( camera );
+    	controls.movementSpeed	= 0.0;
+    	controls.lookSpeed	= 0.0;
+    	controls.lookVertical	= true;
+      controls.noFly = true;
+
+      camera.lookAt(whiteBoard.position);
+
+      updateLoop.push(function(delta, now){
+    		controls.update( delta );
+    	})
+
+      updateLoop.push(function(){
+    		renderer.render( scene, camera );
+    	})
+
+      var lastTimeMsec = null;
+      var mouse = {};
+
+      // Needs to be done within animation context, does weird behavings
+      // if you call it e.g. in mousemove handler
+      var drawify = function() {
+        var raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera( mouse, camera );
+        var intersects = raycaster.intersectObjects( scene.children );
+
+        for ( var i = 0; i < intersects.length; i++ ) {
+          if(intersects[i].object.respondsToIntersection === true) {
+            intersects[i].object.raycastIntersected(intersects[i]);
+          }
+        };
+      }
+
+      requestAnimationFrame(function animate(nowMsec){
+    		// keep looping
+    		requestAnimationFrame( animate );
+    		// measure time
+    		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+    		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+    		lastTimeMsec	= nowMsec
+    		// call each update function
+
+        if(mouse.down) { drawify(); }
+
+    		updateLoop.forEach(function(updateFn){
+    			updateFn(deltaMsec/1000, nowMsec/1000)
+    		})
+    	});
+
+      function mouseHandler(handledEvent) {
+        mouse.down = (handledEvent.buttons != 0);
+        mouse.x = ( handledEvent.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( handledEvent.clientY / window.innerHeight ) * 2 + 1;
+      };
+
+      document.addEventListener('mousedown', mouseHandler);
+      document.addEventListener('mousemove', mouseHandler);
+    </script>
+  </body>
+</html>

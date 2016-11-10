@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VR Viewer Example</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui" name="viewport" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+
+    <script type="text/javascript" src="js/three.js"></script>
+    <script type="text/javascript" src="js/three-vr-viewer.js"></script>
+    <script type="text/javascript" src="js/threex.dynamictexture.js"></script>
+    <script type="text/javascript" src="js/TGALoader.js"></script>
+    <script type="text/javascript" src="js/whiteboard.js"></script>
+    <script type="text/javascript" src="js/room.js"></script>
+    <script type="text/javascript">
+
+      const { scene, camera, renderer, events, toggleVR, controllers  } = VRViewer({
+        //  triggers entering vr without any input
+        autoEnter: true,
+
+        //  create an empty room with two lights
+        emptyRoom: false,
+        THREE
+      });
+
+      console.log( scene, camera, renderer, controllers );
+
+      //  controller not showing? click any button on the controller!
+
+      //
+      //
+      // //  move the box to the controller when trigger is held
+      // controllers[0].addEventListener('triggerdown', function(){
+      //   controllers[ 0 ].add( box );
+      //   box.position.set( 0, 0, -1.0 );
+      // });
+      //
+      // //  move the box back on release
+      // controllers[0].addEventListener('triggerup', function(){
+      //   scene.add( box );
+      //   box.position.set( 0, 1.2, 0 );
+      // });
+
+      var textureLoader = new THREE.TGALoader();
+
+      var room = new Room(textureLoader, scene);
+
+      whiteBoard = new WhiteBoard();
+      whiteBoard.position.x = 0.0;
+      whiteBoard.position.y = 2.0;
+      whiteBoard.position.z = -2.99;
+      scene.add( whiteBoard );
+
+      whiteBoard2 = new WhiteBoard();
+      whiteBoard2.position.x = 0.0;
+      whiteBoard2.position.z = 2.99;
+      whiteBoard2.lookAt(new THREE.Vector3(0,0,0));
+      whiteBoard2.position.y = 2.0;
+      scene.add( whiteBoard2 );
+
+      whiteBoard3 = new WhiteBoard();
+      whiteBoard3.position.x = 2.99;
+      whiteBoard3.lookAt(new THREE.Vector3(0,0,0));
+      whiteBoard3.position.z = 0.0;
+      whiteBoard3.position.y = 2.0;
+      scene.add( whiteBoard3 );
+
+      whiteBoard4 = new WhiteBoard();
+      whiteBoard4.position.x = -2.99;
+      whiteBoard4.lookAt(new THREE.Vector3(0,0,0));
+      whiteBoard4.position.z = 0.0;
+      whiteBoard4.position.y = 2.0;
+      scene.add( whiteBoard4 );
+
+      var tempMatrix = new THREE.Matrix4();
+
+      var drawify = function(controller) {
+        console.log('drawifyin');
+        var raycaster = new THREE.Raycaster();
+        tempMatrix.identity().extractRotation( controller.matrixWorld );
+        raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+        raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
+
+        var intersects = raycaster.intersectObjects( scene.children );
+        if(intersects[0].object.respondsToIntersection === true) {
+          intersects[i].object.raycastIntersected(intersects[i]);
+        }
+
+        // for ( var i = 0; i < intersects.length; i++ ) {
+        //   if(intersects[i].object.respondsToIntersection === true) {
+        //     intersects[i].object.raycastIntersected(intersects[i]);
+        //   }
+        // };
+      }
+
+      events.on('tick', function(dt){
+        if(controllers[0].getButtonState('trigger') === true) {
+          drawify(controllers[0]);
+        }
+        if(controllers[1].getButtonState('trigger') === true) {
+          drawify(controllers[1]);
+        }
+      });
+
+    </script>
+
+  </body>
+</html>

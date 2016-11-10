@@ -1,0 +1,38 @@
+{
+  "name": "three-vr-viewer",
+  "author": "mflux",
+  "license": "MIT",
+  "version": "2.0.6",
+  "description": "One-liner to start THREE.js WebVR projects.",
+  "main": "three-vr-viewer.js",
+  "scripts": {
+    "publish": "npm run build-js-publish && npm run build-copy",
+    "dev": "npm run build-js-dev && npm run build-copy",
+    "build-js-dev": "browserify  -t [ babelify --presets [ es2015 ] ] -s VRViewer index.js > three-vr-viewer.js",
+    "build-js-publish": "browserify  -t [ babelify --presets [ es2015 ] ] -s VRViewer index.js > three-vr-viewer.js",
+    "build-copy": "copyfiles -f three-vr-viewer.js example/js",
+    "test": "cd example && wzrd example_node.js"
+  },
+  "dependencies": {
+    "events": "^1.0.2"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.14.0",
+    "babelify": "^7.3.0",
+    "browserify": "^13.1.0",
+    "copyfiles": "^1.0.0",
+    "three": "^0.80.1",
+    "uglify-js": "^2.4.16",
+    "wzrd": "^1.4.0"
+  },
+  "bugs": {
+    "url": "https://github.com/mflux/three-vr-viewer/issues"
+  },
+  "homepage": "https://github.com/mflux/three-vr-viewer",
+  "keywords": [
+    "three",
+    "js",
+    "webvr",
+    "vr"
+  ]
+}

@@ -1,0 +1,13 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# NPM
+node_modules
+npm-debug.log
+
+# Builds
+public/dist/*
+example/textures/*
+
+.DS_Store
